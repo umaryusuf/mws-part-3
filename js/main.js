@@ -175,7 +175,19 @@ createRestaurantHTML = (restaurant) => {
 
   const like = document.createElement('button');
   like.setAttribute('data-id', restaurant.id);
-  like.innerHTML = "❤️ Favorite";
+  like.innerHTML = "❤️ favourite";
+  like.setAttribute("data-favourite", false);
+  DBHelper.fetchFavouriteRestaurants()
+    .then(res => res.json())
+    .then(data => {
+      for(favourite of data) {
+        if (favourite.id === restaurant.id) {
+          like.innerHTML = "❤️ Unfavorite";
+          like.setAttribute("data-favourite", true);
+        }
+      } 
+    });
+  
   li.append(like);
 
   return li;
@@ -204,13 +216,40 @@ setFavoritesAction = () => {
     button.addEventListener('click', function() {
       // get current restaurant id
       const restaurantId = this.getAttribute('data-id');
-      const url = `http://localhost:1337/restaurants/${restaurantId}/?is_favorite=true`
-      // favorite a restaurant
-      fetch(url,{
-        method: 'PUT'
-      }).then(() => {
-        // change button to unfavourite
-      }).catch(err => console.log(err));
+
+      if (this.getAttribute("data-favourite") === "true") {
+        // unfavourite a restaurant
+        DBHelper.unFavouriteRestaurant(restaurantId)
+          .then(res => {
+            console.log("unfavourite restaurant", res);
+            if (res.statusText === "OK") {
+              this.innerHTML = "❤️ Favorite";
+              this.setAttribute("data-favourite", false);
+            }
+          })
+          .catch(err => console.log(err));
+
+      } else {
+        // favourite a restaurant;
+        DBHelper.favouriteRestaurant(restaurantId)
+          .then((res) => {
+            console.log('favourite restaurant', res);
+            if(res.statusText === "OK") {
+              this.innerHTML = "❤️ Unfavorite";
+              this.setAttribute("data-favourite", true);
+            }
+          })
+          .catch(err => console.log(err));
+      }
+      // const url = `http://localhost:1337/restaurants/${restaurantId}/?is_favorite=true`
+      // // favorite a restaurant
+      // fetch(url,{
+      //   method: 'PUT'
+      // }).then(() => {
+      //   // change button to unfavourite
+      // }).catch(err => console.log(err));
+      // console.log(restaurantId, isFavourite)
+    
     })
   })
 }
