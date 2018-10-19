@@ -1,9 +1,11 @@
+importScripts("/js/idb.js");
+importScripts("/js/dbhelper.js");
 const staticCacheName = 'restaurant-1';
 const resourcesToCache = [
   '/',
   'index.html',
   'restaurant.html',
-  'css/styles.min.css',
+  'css/styles.css',
   'js/idb.js',
   'js/dbhelper.js',
   'js/restaurant_info.js',
@@ -75,10 +77,11 @@ self.addEventListener('activate', event => {
     }),
   );
 });
+
 /*
-* checks for a request in cache, return response if found
-* or save it for later use
-*/
+ * checks for a request in cache, return response if found
+ * or save it for later use
+ */
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request, { ignoreSearch: true }).then(response => {
@@ -91,3 +94,43 @@ self.addEventListener('fetch', event => {
     })
   );
 });
+
+self.addEventListener('sync', e => {
+  console.log("service worker background syncing", e);
+  if(e.tag === "sync-new-reviews") {
+    console.log("syncing new reviews");
+    e.waitUntil(
+      db.readeAllDeferedReviews()
+        .then(data => {
+          for (const review of data) {
+            fetch("http://localhost:1337/reviews/", {
+              method: "POST",
+              header: {
+                "Content-Type": "application/json",
+                Accept: "application/json"
+              },
+              body: JSON.stringify({
+                restaurant_id: review.restaurant_id,
+                name: review.name,
+                rating: review.rating,
+                comments: review.comments
+              })
+            })
+            .then(res => res.json())
+            .then(data => {
+              // save review to IDB
+              const unique = '_' + Math.random().toString(36).substr(2, 9);
+              // add unique property to response object
+              data.unique = unique;
+              // save review in IDB 
+              addSingleReview(data);
+              // delete defered review from IDB
+              db.deleteDeferedReview(review.id);
+            })
+            .catch(error => console.log('error syncing data to online server', error));
+          }
+        })
+        .catch(error => console.log('unable to fetch defered reviews from IDB', error))
+    )
+  }
+})

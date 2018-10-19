@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <!-- Normalize.css for better cross-browser consistency -->
   <link rel="stylesheet" src="//normalize-css.googlecode.com/svn/trunk/normalize.css" />
   <meta name="theme-color" content="#2196F3" >
   <!-- Main CSS file -->
-  <link rel="stylesheet" href="css/styles.min.css" type="text/css">
+  <link rel="stylesheet" href="css/styles.css" type="text/css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css" integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ=="
     crossorigin="" />
   <title>Restaurant Info</title>
@@ -56,6 +56,8 @@
       <ul class="reviews-list"></ul>
     </section>
     <!-- End reviews -->
+    <!-- notification -->
+    <section class="toast"></section>
   </main>
   <!-- End main -->
 
@@ -74,7 +76,6 @@
   <script src="js/idb.js"></script>
   <script src="js/dbhelper.js"></script>
   <script src="js/restaurant_info.js"></script>
-  <script src="js/main.js></script>
   
 </body>
 </html>

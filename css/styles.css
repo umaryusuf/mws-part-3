@@ -271,11 +271,7 @@ a.skip-main:active {
   font-size: 11pt;
 }
 
-.restaurants-list li a {
-  background-color: #02539c;
-  /*changed the backgroundcolor to darker*/
-  border-bottom: 3px solid #eee;
-  color: #fff;
+.restaurants-list li a, .restaurants-list li button {
   display: inline-block;
   font-size: 10pt;
   margin: 15px 0 0;
@@ -283,6 +279,19 @@ a.skip-main:active {
   text-align: center;
   text-decoration: none;
   text-transform: uppercase;
+  width: 100%;
+}
+
+.restaurants-list li a {
+  /* background-color: #02539c; */
+  border: 2px solid #02539c;
+  color: #02539c;
+}
+
+.restaurants-list li button {
+  background-color: white;
+  border: 2px solid brown;
+  color: brown;
 }
 
 /* ====================== Restaurant Details ====================== */
@@ -350,7 +359,8 @@ a.skip-main:active {
 }
 
 .restaurant-container,
-.reviews-container {
+.reviews-container,
+.form-container {
   border-bottom: 1px solid #d9d9d9;
   border-top: 1px solid #fff;
   padding: 140px 40px 30px;
@@ -381,9 +391,9 @@ a.skip-main:active {
   list-style-type: none;
   margin: 0 0 30px;
   overflow: hidden;
-  padding: 0 20px 20px;
+  padding: 20px 20px;
   position: relative;
-  width: 85%;
+  width: 90%;
 }
 
 .reviews-list li p {
@@ -393,6 +403,96 @@ a.skip-main:active {
 #restaurant-hours td {
   color: #666;
 }
+
+.form-container {
+  padding: 30px 40px 80px;
+}
+
+.reviews-form {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+}
+.reviews-form label{
+  flex: 1;
+  width: 100%;
+  margin-top: 5px;
+}
+
+.reviews-form input, .reviews-form textarea {
+  padding: 5px;
+  width: 90%;
+  box-shadow: 1px 2px 4px 0 rgba(0, 0, 0, 0.08);
+  border: 1px solid #dbdbdb;
+}
+
+.reviews-form textarea {
+  min-height: 5em;
+  max-width: 90%;
+}
+
+.reviews-form button {
+  width: 90%;
+  background: #02539c;
+  color: white;
+  border: none;
+  padding: 8px 30px;
+  margin-top: 5px;
+}
+
+.reviews-form button:hover {
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* toast styles*/
+.toast{
+  visibility: hidden; /* Hidden by default. Visible on click */
+  min-width: 250px; 
+  margin-left: -125px; 
+  background-color: #333; 
+  color: #fff; 
+  text-align: center; 
+  border-radius: 2px; 
+  padding: 16px; 
+  position: fixed; 
+  z-index: 1; 
+  left: 50%; 
+  bottom: 30px; 
+}
+
+/* Show the snackbar when clicking on a button (class added with JavaScript) */
+.toast.show {
+  visibility: visible; /* Show the snackbar */
+    /* Add animation: Take 0.5 seconds to fade in and out the snackbar. 
+   However, delay the fade out process for 2.5 seconds */
+  -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+  animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+
+/* Animations to fade the snackbar in and out */
+@keyframes fadein {
+  from {
+    bottom: 0; 
+    opacity: 0;
+  }
+  to {
+    bottom: 30px; 
+    opacity: 1;
+  }
+}
+
+@keyframes fadeout {
+  from {
+    bottom: 30px; 
+    opacity: 1;
+  }
+  to {
+    bottom: 0; 
+    opacity: 0;
+  }
+}
+
 
 /* media queries */
 

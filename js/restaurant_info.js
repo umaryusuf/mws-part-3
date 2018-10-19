@@ -1,3 +1,4 @@
+
 let restaurant;
 var newMap;
 
@@ -6,6 +7,7 @@ var newMap;
  */
 document.addEventListener('DOMContentLoaded', (event) => {
   initMap();
+
 });
 
 /**
@@ -84,8 +86,12 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   if (restaurant.operating_hours) {
     fillRestaurantHoursHTML();
   }
-  // fill reviews
-  fillReviewsHTML();
+  // get all reviews
+  DBHelper.fetchReviewsById(restaurant.id, (error, reviews) => {
+    // fill reviews
+    fillReviewsHTML(reviews);
+  })
+  
 }
 
 /**
@@ -108,6 +114,7 @@ fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => 
   }
 }
 
+
 /**
  * Create all reviews HTML and add them to the webpage.
  */
@@ -121,13 +128,94 @@ fillReviewsHTML = (reviews = self.restaurant.reviews) => {
     const noReviews = document.createElement('p');
     noReviews.innerHTML = 'No reviews yet!';
     container.appendChild(noReviews);
+    const form = createReviewForm();
+    container.appendChild(form);
     return;
   }
   const ul = document.querySelector('.reviews-list');
   reviews.forEach(review => {
     ul.appendChild(createReviewHTML(review));
   });
+
   container.appendChild(ul);
+  const form = createReviewForm();
+  container.appendChild(form);
+
+  setFormHandler();
+}
+
+/**
+*create a review form for all restaurants
+*/
+createReviewForm = () => {
+  const form = document.createElement('form');
+  form.setAttribute('class', 'reviews-form');
+  const h3 = document.createElement('h3'); // form header
+  h3.innerHTML = "Add a review";
+
+  form.appendChild(h3);
+
+  const nameInput = createNameInput();
+  const ratingInput = createRatingInput();
+  const commentInput = createCommentInput();
+  // create submit button
+  const btn = document.createElement('button');
+  btn.innerHTML = "SUBMIT";
+  btn.setAttribute('type', 'submit');
+  // add elements to form
+  form.appendChild(nameInput);
+  form.appendChild(ratingInput);
+  form.appendChild(commentInput);
+  form.appendChild(btn);
+
+  return form;
+}
+/**
+* create name input
+*/
+createNameInput = () => {
+  const label = document.createElement('label');
+  label.innerHTML = "Name: ";
+  const input = document.createElement('input');
+  input.setAttribute('type', 'text');
+  input.setAttribute('class', 'name');
+  const br = document.createElement('br');
+  label.appendChild(br);
+  label.appendChild(input);
+
+  return label;
+}
+/**
+* create rating input
+*/
+createRatingInput = () => {
+  const label = document.createElement('label');
+  label.innerHTML = "Rating: ";
+  const input = document.createElement('input');
+  input.setAttribute('type', 'number');
+  input.setAttribute('min', '1');
+  input.setAttribute('max', '5');
+  input.setAttribute('class', 'rating');
+  const br = document.createElement('br');
+  label.appendChild(br);
+  label.appendChild(input);
+
+  return label;
+}
+
+/**
+* create comment box
+*/
+createCommentInput = () => {
+  const label = document.createElement('label');
+  label.innerHTML = "Comment: ";
+  const textarea = document.createElement('textarea');
+  textarea.setAttribute('class', 'comment');
+  const br = document.createElement('br');
+  label.appendChild(br);
+  label.appendChild(textarea);
+
+  return label;
 }
 
 /**
@@ -135,12 +223,12 @@ fillReviewsHTML = (reviews = self.restaurant.reviews) => {
  */
 createReviewHTML = (review) => {
   const li = document.createElement('li');
-  const name = document.createElement('p');
+  const name = document.createElement('h4');
   name.innerHTML = review.name;
   li.appendChild(name);
 
   const date = document.createElement('p');
-  date.innerHTML = review.date;
+  date.innerHTML = `<em>${new Date(review.createdAt).toDateString()}</em>`;
   li.appendChild(date);
 
   const rating = document.createElement('p');
@@ -152,6 +240,142 @@ createReviewHTML = (review) => {
   li.appendChild(comments);
 
   return li;
+}
+/**
+ * update reviews list
+ */
+updateReviewsHTML = review => {
+  const ul = document.querySelector(".reviews-list");
+
+  ul.appendChild(createReviewHTML(review));
+}
+
+/**
+ * show toast helper
+ */
+showToast = message => {
+  // Get the snackbar DIV
+  const x = document.querySelector(".toast");
+  x.innerHTML = message;
+  // Add the "show" class
+  x.classList.add("show");
+  // After 3 seconds, remove the show class from DIV
+  setTimeout(() => x.classList.remove("show"), 3000);
+};
+
+/**
+ * set form handler
+ */
+setFormHandler = () => {
+  const form = document.querySelector('form');
+  let name = form.querySelector('.name');
+  let rating = form.querySelector('.rating');
+  let comment = form.querySelector('.comment');
+  
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+
+    if (name.value === "" || rating.value === "" || comment.value === "") {
+      showToast("all fields are required");
+      return;
+    }
+    
+    // check if browser support service wroker and backgroud sync
+    if ('serviceWorker' in navigator && 'SyncManager' in window) {
+      if(navigator.onLine) {
+        // user is online
+        const review = {
+          name: name.value,
+          rating: rating.value,
+          comments: comment.value,
+          restaurant_id: self.restaurant.id
+        };
+        
+        DBHelper.sendReviewData(review, (error, data) => {
+          if(error) {
+            console.log(error);
+          }
+          // udate reviews list
+          updateReviewsHTML(data);
+          showToast("Sucessfully added your review"); // show success message
+        
+          const unique = '_' + Math.random().toString(36).substr(2, 9);
+          // add unique property to data response
+          data.unique = unique;
+          // save review in IDB 
+          db.addSingleReview(data);
+          // set input fields to empty
+          name.value = ""; 
+          rating.value = ""; 
+          comment.value = "";
+        })
+      } else {// user is offline
+        // set background sync
+        navigator.serviceWorker.ready
+          .then(sw => {
+            const date = new Date().toISOString();
+            const review = {
+              id: date,
+              name: name.value,
+              rating: rating.value,
+              comments: comment.value,
+              restaurant_id: self.restaurant.id
+            };
+            // save defered review to IDB
+            db.writeDeferedReviewToIDB(review)
+              .then(() => {
+                sw.sync.register("sync-new-reviews");
+              })
+              .then(() => {
+                showToast("Review saved for background syncing");
+                review.createdAt = date;
+                updateReviewsHTML(review);
+                // set input fields to empty
+                name.value = "";
+                rating.value = "";
+                comment.value = "";
+              })
+              .catch(err => console.log(err));
+          })
+          .catch(error => console.log(error))
+      }
+      
+    } else { // does not support backgroud syncing
+      // check if user is online
+      if (navigator.onLine) { // does not support backgroud syncing but user is online
+        const review = {
+          name: name.value,
+          rating: rating.value,
+          comments: comment.value,
+          restaurant_id: self.restaurant.id
+        };
+        // save review and update reviews list
+        DBHelper.sendReviewData(review, (error, data) => {
+          if (error) {
+            console.log(error);
+          }
+          // udate reviews list
+          updateReviewsHTML(data);
+          showToast("Sucessfully added your review"); // show success message
+
+          const unique = '_' + Math.random().toString(36).substr(2, 9);
+          // add unique property to data response
+          data.unique = unique;
+          // save review in IDB 
+          db.addSingleReview(data);
+          // set input fields to empty
+          name.value = "";
+          rating.value = "";
+          comment.value = "";
+        })
+      } else {
+        // does not support backgroud syncing and user is offline
+        showToast("Sorry you cannot add review offline");
+      }
+      
+    }
+
+  })
 }
 
 /**

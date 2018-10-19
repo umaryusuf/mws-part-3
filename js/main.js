@@ -1,19 +1,3 @@
-// check if current browser support service worker
-if ('serviceWorker' in navigator) {
-  // register service worker
-  navigator.serviceWorker.register('./sw.js')
-    .then(reg => {
-      // service worker registration sucessfull
-      console.log('service worker registered successfully');
-    })
-    .catch(err => {
-      // handling registration error
-      console.log(`service worker registration failed with ${err}`)
-    })
-} else {
-  // current browser does not support service worker
-  console.log('browser does not support service worker');
-}
 
 let restaurants,
   neighborhoods,
@@ -25,7 +9,6 @@ var markers = [];
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
  */
 document.addEventListener('DOMContentLoaded', (event) => {
-  window.innerWidth = window.outerWidth
   initMap(); // added
   fetchNeighborhoods();
   fetchCuisines();
@@ -126,6 +109,7 @@ updateRestaurants = () => {
     } else {
       resetRestaurants(restaurants);
       fillRestaurantsHTML();
+      setFavoritesAction();
     }
   });
 }
@@ -189,6 +173,11 @@ createRestaurantHTML = (restaurant) => {
   more.href = DBHelper.urlForRestaurant(restaurant);
   li.append(more);
 
+  const like = document.createElement('button');
+  like.setAttribute('data-id', restaurant.id);
+  like.innerHTML = "❤️ Favorite";
+  li.append(like);
+
   return li;
 }
 
@@ -206,4 +195,22 @@ addMarkersToMap = (restaurants = self.restaurants) => {
     self.markers.push(marker);
   });
 
+}
+
+setFavoritesAction = () => {
+  // add favorite functionalities
+  const buttons = document.querySelectorAll('button');
+  buttons.forEach(button => {
+    button.addEventListener('click', function() {
+      // get current restaurant id
+      const restaurantId = this.getAttribute('data-id');
+      const url = `http://localhost:1337/restaurants/${restaurantId}/?is_favorite=true`
+      // favorite a restaurant
+      fetch(url,{
+        method: 'PUT'
+      }).then(() => {
+        // change button to unfavourite
+      }).catch(err => console.log(err));
+    })
+  })
 }
