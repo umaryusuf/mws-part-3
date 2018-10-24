@@ -16,6 +16,7 @@ if ('serviceWorker' in navigator) {
 }
 
 const db = (() => {
+  // indexeddb connection
   const dbPromise = idb.open('restaurants-reviews', 2, upgradeDb => {
     if (!upgradeDb.objectStoreNames.contains("restaurants")) {
       upgradeDb.createObjectStore("restaurants", { 
@@ -60,7 +61,7 @@ const db = (() => {
     .then(() => console.log('restaurant added'))
     .catch(error => console.log('unable to store restaurant', error));
   };
-
+  // add reviews by restaurant is
   addReviewByRestaurantId = reviews => {
     dbPromise.then(db => {
       const tx = db.transaction("reviews", "readwrite");
@@ -74,20 +75,19 @@ const db = (() => {
     .then(() => console.log('reviews saved to IDB'))
     .catch(error => console.log('Unable to save reviews to IDB',error));
   }
-
+  // add single review
   addSingleReview = review => {
     dbPromise.then(db => {
       const tx = db.transaction("reviews", "readwrite");
       const store = tx.objectStore("reviews");
 
       store.put(review);
-      
       return tx.complete;
     })
       .then(() => console.log('review saved to IDB'))
       .catch(error => console.log('Unable to save review to IDB', error));
   }
-
+  // get all reviews by restaurant id
   getReviewByRestaurantId = restaurantId => {
     return dbPromise.then(db => {
       const tx = db.transaction("reviews");
@@ -99,7 +99,7 @@ const db = (() => {
       .then(reviews => reviews)
       .catch(error => console.log('unable to fetch reviews from idb', error));
   }
-
+  // save defred reviews
   writeDeferedReviewToIDB = (data) => {
     return dbPromise
       .then(db => {
@@ -109,7 +109,7 @@ const db = (() => {
         return tx.complete;
       });
   }
-
+  // read all deererd reviews
   readeAllDeferedReviews = () => {
     return dbPromise
       .then(db => {
@@ -119,7 +119,7 @@ const db = (() => {
         return store.getAll();
       });
   }
-
+  // delete defered reviews
   deleteDeferedReview = id => {
     return dbPromise
       .then(db => {
@@ -148,18 +148,13 @@ const db = (() => {
  * Common database helper functions.
  */
 class DBHelper {
-  /**
-   * Database URL.
-   * Change this to restaurants.json file location on your server.
-   */
+  // Database URL.
   static get DATABASE_URL() {
     const port = 1337; // Change this to your server port
     return `http://localhost:${port}/restaurants`;
   }
 
-  /**
-   * Fetch all restaurants.
-   */
+  // Fetch all restaurants.
   static fetchRestaurants(callback) {
     fetch(DBHelper.DATABASE_URL)
       .then(res => res.json())
@@ -170,9 +165,7 @@ class DBHelper {
       });
   }
 
-  /**
-   * Fetch a restaurant by its ID.
-   */
+  // Fetch a restaurant by its ID.
   static fetchRestaurantById(id, callback) {
     // check if restaurant exist inside our indexedDB
     db.fetchById(id)
@@ -198,9 +191,7 @@ class DBHelper {
       .catch(error => console.log(error));
   }
 
-  /**
-   * Fetch restaurants by a cuisine type with proper error handling.
-   */
+  // Fetch restaurants by a cuisine type with proper error handling.
   static fetchRestaurantByCuisine(cuisine, callback) {
     // Fetch all restaurants  with proper error handling
     DBHelper.fetchRestaurants((error, restaurants) => {
@@ -214,9 +205,7 @@ class DBHelper {
     });
   }
 
-  /**
-   * Fetch restaurants by a neighborhood with proper error handling.
-   */
+  // Fetch restaurants by a neighborhood with proper error handling.
   static fetchRestaurantByNeighborhood(neighborhood, callback) {
     // Fetch all restaurants
     DBHelper.fetchRestaurants((error, restaurants) => {
@@ -230,9 +219,7 @@ class DBHelper {
     });
   }
 
-  /**
-   * Fetch restaurants by a cuisine and a neighborhood with proper error handling.
-   */
+  // Fetch restaurants by a cuisine and a neighborhood with proper error handling.
   static fetchRestaurantByCuisineAndNeighborhood(
     cuisine,
     neighborhood,
@@ -257,9 +244,7 @@ class DBHelper {
     });
   }
 
-  /**
-   * Fetch all neighborhoods with proper error handling.
-   */
+  // Fetch all neighborhoods with proper error handling.
   static fetchNeighborhoods(callback) {
     // Fetch all restaurants
     DBHelper.fetchRestaurants((error, restaurants) => {
@@ -279,9 +264,7 @@ class DBHelper {
     });
   }
 
-  /**
-   * Fetch all cuisines with proper error handling.
-   */
+  // Fetch all cuisines with proper error handling.
   static fetchCuisines(callback) {
     // Fetch all restaurants
     DBHelper.fetchRestaurants((error, restaurants) => {
@@ -298,9 +281,8 @@ class DBHelper {
       }
     });
   }
-  /**
-   * fetch all favourite restaurant
-   */
+
+  // fetch all favourite restaurant
   static fetchFavouriteRestaurants() {
     return fetch("http://localhost:1337/restaurants/?is_favorite=true");
   }
@@ -324,23 +306,17 @@ class DBHelper {
     });
   }
 
-  /**
-   * Restaurant page URL.
-   */
+  // Restaurant page URL.
   static urlForRestaurant(restaurant) {
     return `./restaurant.html?id=${restaurant.id}`;
   }
 
-  /**
-   * Restaurant image URL.
-   */
+  // Restaurant image URL.
   static imageUrlForRestaurant(restaurant) {
-    return `/img/${restaurant.photograph || restaurant.id}.jpg`;
+    return `/img/${restaurant.photograph || restaurant.id}_large.jpg`;
   }
 
-  /**
-   * restaurant image srcset URL
-   */
+  // restaurant image srcset URL.
   static imgSrcSetRestaurant(restaurant) {
     return `/img/${restaurant.id}_large.jpg 1200w, /img/${
       restaurant.id

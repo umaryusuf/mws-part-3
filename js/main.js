@@ -1,4 +1,3 @@
-
 let restaurants,
   neighborhoods,
   cuisines;
@@ -9,9 +8,12 @@ var markers = [];
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
  */
 document.addEventListener('DOMContentLoaded', (event) => {
-  initMap(); // added
+  // initMap(); // added
   fetchNeighborhoods();
   fetchCuisines();
+  updateRestaurants();
+  addShowMapButton();
+  showMap()
 });
 
 /**
@@ -27,10 +29,33 @@ fetchNeighborhoods = () => {
     }
   });
 }
+// add a show map button
+addShowMapButton = () => {
+  const container =  document.querySelector('.map-container');
+  const button = document.createElement('button');
+  button.setAttribute('id', 'show-map');
+  button.innerHTML = 'Show Map';
+  container.appendChild(button)
+}
+// show map
+showMap = () => {
+  const button = document.querySelector("#show-map");
+  const parent = button.parentElement;
+  const map = button.previousElementSibling;
 
-/**
- * Set neighborhoods HTML.
- */
+  button.addEventListener('click', () => {
+    parent.removeChild(button);
+    map.style.display = 'block';
+    const link = document.createElement('link');
+    link.setAttribute("rel", "stylesheet");
+    link.setAttribute("href", "https://unpkg.com/leaflet@1.3.1/dist/leaflet.css");
+    document.head.appendChild(link);
+
+    initMap();
+  })
+}
+
+// Set neighborhoods HTML.
 fillNeighborhoodsHTML = (neighborhoods = self.neighborhoods) => {
   const select = document.getElementById('neighborhoods-select');
   neighborhoods.forEach(neighborhood => {
@@ -41,9 +66,7 @@ fillNeighborhoodsHTML = (neighborhoods = self.neighborhoods) => {
   });
 }
 
-/**
- * Fetch all cuisines and set their HTML.
- */
+// Fetch all cuisines and set their HTML.
 fetchCuisines = () => {
   DBHelper.fetchCuisines((error, cuisines) => {
     if (error) { // Got an error!
@@ -55,9 +78,7 @@ fetchCuisines = () => {
   });
 }
 
-/**
- * Set cuisines HTML.
- */
+// Set cuisines HTML.
 fillCuisinesHTML = (cuisines = self.cuisines) => {
   const select = document.getElementById('cuisines-select');
 
@@ -69,9 +90,7 @@ fillCuisinesHTML = (cuisines = self.cuisines) => {
   });
 }
 
-/**
- * Initialize leaflet map, called from HTML.
- */
+// Initialize leaflet map, called from HTML.
 initMap = () => {
   self.newMap = L.map('map', {
         center: [40.722216, -73.987501],
@@ -87,12 +106,9 @@ initMap = () => {
     id: 'mapbox.streets'
   }).addTo(newMap);
 
-  updateRestaurants();
 }
 
-/**
- * Update page and map for current restaurants.
- */
+// Update page and map for current restaurants.
 updateRestaurants = () => {
   const cSelect = document.getElementById('cuisines-select');
   const nSelect = document.getElementById('neighborhoods-select');
@@ -114,9 +130,7 @@ updateRestaurants = () => {
   });
 }
 
-/**
- * Clear current restaurants, their HTML and remove their map markers.
- */
+// Clear current restaurants, their HTML and remove their map markers.
 resetRestaurants = (restaurants) => {
   // Remove all restaurants
   self.restaurants = [];
@@ -131,9 +145,7 @@ resetRestaurants = (restaurants) => {
   self.restaurants = restaurants;
 }
 
-/**
- * Create all restaurants HTML and add them to the webpage.
- */
+// Create all restaurants HTML and add them to the webpage.
 fillRestaurantsHTML = (restaurants = self.restaurants) => {
   const ul = document.querySelector('.restaurants-list');
   restaurants.forEach(restaurant => {
@@ -142,9 +154,7 @@ fillRestaurantsHTML = (restaurants = self.restaurants) => {
   addMarkersToMap();
 }
 
-/**
- * Create restaurant HTML.
- */
+// Create restaurant HTML.
 createRestaurantHTML = (restaurant) => {
   const li = document.createElement('li');
 
@@ -193,9 +203,7 @@ createRestaurantHTML = (restaurant) => {
   return li;
 }
 
-/**
- * Add markers for current restaurants to the map.
- */
+// Add markers for current restaurants to the map.
 addMarkersToMap = (restaurants = self.restaurants) => {
   restaurants.forEach(restaurant => {
     // Add marker to the map
@@ -208,7 +216,7 @@ addMarkersToMap = (restaurants = self.restaurants) => {
   });
 
 }
-
+// sets the action for favorite button
 setFavoritesAction = () => {
   // add favorite functionalities
   const buttons = document.querySelectorAll('button');
@@ -241,15 +249,6 @@ setFavoritesAction = () => {
           })
           .catch(err => console.log(err));
       }
-      // const url = `http://localhost:1337/restaurants/${restaurantId}/?is_favorite=true`
-      // // favorite a restaurant
-      // fetch(url,{
-      //   method: 'PUT'
-      // }).then(() => {
-      //   // change button to unfavourite
-      // }).catch(err => console.log(err));
-      // console.log(restaurantId, isFavourite)
-    
     })
   })
 }

@@ -6,35 +6,52 @@ var newMap;
  * Initialize map as soon as the page is loaded.
  */
 document.addEventListener('DOMContentLoaded', (event) => {
-  initMap();
-
+  
+  render();
 });
-
-/**
- * Initialize leaflet map
- */
-initMap = () => {
+// renders a restaurant 
+render = () => {
   fetchRestaurantFromURL((error, restaurant) => {
     if (error) { // Got an error!
       console.error(error);
     } else {
-      self.newMap = L.map('map', {
-        center: [restaurant.latlng.lat, restaurant.latlng.lng],
-        zoom: 16,
-        scrollWheelZoom: false
-      });
-      L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.jpg70?access_token={mapboxToken}', {
-        mapboxToken: 'pk.eyJ1IjoidW1hcnl1c3VmIiwiYSI6ImNqa2pzMzV6bzBzOGQzcHBoZWI4eGZ6Y3IifQ.AbhumTLiRdMM7isvxmlE-w',
-        maxZoom: 18,
-        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
-          '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-          'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-        id: 'mapbox.streets'
-      }).addTo(newMap);
       fillBreadcrumb();
-      DBHelper.mapMarkerForRestaurant(self.restaurant, self.newMap);
+      const button = document.querySelector("#show-map");
+      const parent = button.parentElement;
+      const map = document.querySelector("#map");
+      // show the map when button is clicked
+      button.addEventListener("click", () => {
+        parent.removeChild(button);
+        map.style.display = "block";
+        const link = document.createElement("link");
+        link.setAttribute("rel", "stylesheet");
+        link.setAttribute("href", "https://unpkg.com/leaflet@1.3.1/dist/leaflet.css");
+        document.head.appendChild(link);
+
+        initMap(restaurant.latlng.lat, restaurant.latlng.lng);
+      });
     }
+  }); 
+};
+/**
+ * Initialize leaflet map
+ */
+initMap = (lat, lng) => {
+  self.newMap = L.map('map', {
+    center: [lat, lng],
+    zoom: 16,
+    scrollWheelZoom: false
   });
+  L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.jpg70?access_token={mapboxToken}', {
+    mapboxToken: 'pk.eyJ1IjoidW1hcnl1c3VmIiwiYSI6ImNqa2pzMzV6bzBzOGQzcHBoZWI4eGZ6Y3IifQ.AbhumTLiRdMM7isvxmlE-w',
+    maxZoom: 18,
+    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+      '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+      'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+    id: 'mapbox.streets'
+  }).addTo(newMap);
+
+  DBHelper.mapMarkerForRestaurant(self.restaurant, self.newMap);
 }
 
 /**
@@ -150,7 +167,7 @@ fillReviewsHTML = (reviews = self.restaurant.reviews) => {
 createReviewForm = () => {
   const form = document.createElement('form');
   form.setAttribute('class', 'reviews-form');
-  const h3 = document.createElement('h3'); // form header
+  const h3 = document.createElement('h3'); 
   h3.innerHTML = "Add a review";
 
   form.appendChild(h3);
