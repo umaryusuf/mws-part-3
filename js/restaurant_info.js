@@ -244,10 +244,6 @@ createReviewHTML = (review) => {
   name.innerHTML = review.name;
   li.appendChild(name);
 
-  const date = document.createElement('p');
-  date.innerHTML = `<em>${new Date(review.createdAt).toDateString()}</em>`;
-  li.appendChild(date);
-
   const rating = document.createElement('p');
   rating.innerHTML = `Rating: ${review.rating}`;
   li.appendChild(rating);
@@ -337,7 +333,8 @@ setFormHandler = () => {
               rating: rating.value,
               comments: comment.value,
               restaurant_id: self.restaurant.id
-            };
+            }; 
+
             // save defered review to IDB
             db.writeDeferedReviewToIDB(review)
               .then(() => {
@@ -353,6 +350,14 @@ setFormHandler = () => {
                 comment.value = "";
               })
               .catch(err => console.log(err));
+
+            // save review to IDB - reviews
+            const unique = '_' + Math.random().toString(36).substr(2, 9);
+            // add unique property to rewiew
+            review.unique = unique;
+            // save review in IDB 
+            db.addSingleReview(review);
+
           })
           .catch(error => console.log(error))
       }

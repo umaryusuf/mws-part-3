@@ -107,13 +107,7 @@ self.addEventListener('sync', e => {
               })
             })
             .then(res => res.json())
-            .then(data => {
-              // save review to IDB
-              const unique = '_' + Math.random().toString(36).substr(2, 9);
-              // add unique property to response object
-              data.unique = unique;
-              // save review in IDB 
-              addSingleReview(data);
+            .then(() => {
               // delete defered review from IDB
               db.deleteDeferedReview(review.id);
             })
