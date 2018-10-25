@@ -33,7 +33,7 @@ a.skip-main:focus,a.skip-main:active{color:#fff;background-color:#02539c;left:au
 .reviews-form{display:flex;flex-direction:column;flex-wrap:wrap}.reviews-form label{flex:1;width:100%;margin-top:5px}
 .reviews-form input,.reviews-form textarea{padding:5px;width:90%;box-shadow:1px 2px 4px 0 rgba(0,0,0,0.08);border:1px solid #dbdbdb}
 .reviews-form textarea{min-height:5em;max-width:90%}.reviews-form button,#show-map{width:90%;background:#02539c;color:white;border:0;padding:8px 30px;margin-top:5px}
-#show-map{margin:10px 3px;width:99%;max-width:100%}button:hover{cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.4)}
+#show-map{width:calc(100% - 10px);margin:10px 5px}button:hover{cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.4)}
 .toast{visibility:hidden;min-width:250px;margin-left:-125px;background-color:#333;color:#fff;text-align:center;border-radius:2px;padding:16px;position:fixed;z-index:1;left:50%;bottom:30px}
 .toast.show{visibility:visible;-webkit-animation:fadein .5s,fadeout .5s 2.5s;animation:fadein .5s,fadeout .5s 2.5s}
 @keyframes fadein{from{bottom:0;opacity:0}to{bottom:30px;opacity:1}}@keyframes fadeout{from{bottom:30px;opacity:1}

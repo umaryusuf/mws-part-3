@@ -76,6 +76,9 @@ self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request, { ignoreSearch: true }).then(response => {
       return response || fetch(event.request).then(res => {
+        if (!res || res.status !== 200 || res.type !== 'basic') {
+          return res;
+        }
         return caches.open(staticCacheName).then(cache => {
           cache.put(event.request, res.clone());
           return res;
